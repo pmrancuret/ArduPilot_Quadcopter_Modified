@@ -1,0 +1,10 @@
+This project is an attempt to modify the open source ArduPilot software in order to operate a homemade Quad Copter built by John McArthur and Paul Rancuret.
+
+Originally, the code was taken from version 2.7 of the ArduPilot software, for the ArduPilot board.  The Wiki for this board (along with downloadable code and other information) is found at https://code.google.com/p/ardupilot/.
+
+Modifications to make to this software:
+
+Need to read all four throttle, pitch, roll, and yaw channels in.
+Need to mix them in such a way to produce four output signals to the four motors.
+The throttle command input will provide a baseline throttle setting for each of the four motors.
+Then, they will be modulated by adding/subtracting from opposite sides of the craft in order to rotate.  Yaw will be done by modulating motors as opposite pairs together, separate from the other pair.  Sorry I don't know how to explain it better, we'll learn as we go!
