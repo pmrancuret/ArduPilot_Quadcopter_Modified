@@ -8,3 +8,5 @@ Need to read all four throttle, pitch, roll, and yaw channels in.
 Need to mix them in such a way to produce four output signals to the four motors.
 The throttle command input will provide a baseline throttle setting for each of the four motors.
 Then, they will be modulated by adding/subtracting from opposite sides of the craft in order to rotate.  Yaw will be done by modulating motors as opposite pairs together, separate from the other pair.  Sorry I don't know how to explain it better, we'll learn as we go!
+
+Git help!
