@@ -9,4 +9,4 @@ Need to mix them in such a way to produce four output signals to the four motors
 The throttle command input will provide a baseline throttle setting for each of the four motors.
 Then, they will be modulated by adding/subtracting from opposite sides of the craft in order to rotate.  Yaw will be done by modulating motors as opposite pairs together, separate from the other pair.  Sorry I don't know how to explain it better, we'll learn as we go!
 
-Git help!
+Eclipse is used as the IDE for this project, instead of the Arduino IDE.  For this reason, all code is treated as conventional c++ code, and requires the normal header files with function declarations, etc.  These files have been modified to add the necessary prototypes.
