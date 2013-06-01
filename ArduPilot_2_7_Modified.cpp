@@ -571,6 +571,13 @@ void update_current_flight_mode(void)
 			}
 			break;
 
+		case QUAD_MAN:
+			servo_out[CH_ROLL]  = radio_in[CH_ROLL];
+			servo_out[CH_PITCH] = radio_in[CH_PITCH];
+			servo_out[CH_THROTTLE]  = radio_in[CH_THROTTLE];
+			servo_out[CH_RUDDER] = radio_in[CH_RUDDER];
+			break;
+
 		case MANUAL:
 			// servo_out is for Sim control only
 			// ---------------------------------

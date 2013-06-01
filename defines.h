@@ -62,6 +62,8 @@
 #define TAKEOFF 13
 #define LAND 14
 
+#define QUAD_MAN 15
+
 // Waypoint Modes
 // ----------------
 #define ABS_WP 0

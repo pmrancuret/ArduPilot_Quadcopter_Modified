@@ -34,6 +34,19 @@ void set_servo_mux(boolean mode)
 // wants +- 45°
 void set_servos_4()
 {
+#if QUAD_COPTER==1
+   OCR1A=servo_out[CH_THROTTLE]*2;
+   OCR1B=servo_out[CH_THROTTLE]*2;
+   radio_out[CH_THROTTLE]=(float)servo_out[CH_THROTTLE];
+   uint16_t timer_out 	= radio_out[CH_THROTTLE] % 512; 
+   timer_ovf_b 		= radio_out[CH_THROTTLE] / 512;
+   timer_ovf_a 		= radio_out[CH_THROTTLE] / 512;
+   timer_out >>= 1;
+   OCR2A = timer_out;
+   OCR2B = timer_out;
+   
+#else
+
 	#if GPS_PROTOCOL == 3
 		if(imu_ok == false && control_mode > MANUAL){	        //  We have lost the IMU - Big trouble
 			servo_out[CH_ROLL] = 0;   							//  If we have lost imu we will probably crash.  
@@ -55,6 +68,7 @@ void set_servos_4()
 
 	set_ch4_degrees(servo_out[CH_RUDDER]);
 	update_throttle();
+#endif      
 }
 
 

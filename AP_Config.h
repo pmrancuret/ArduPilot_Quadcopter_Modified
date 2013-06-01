@@ -1,5 +1,5 @@
 /* ArduPilot 2.7.1 Header file : July 23, 2010 */
-
+// Testing comments
 
 /*
 These Flight Modes can be changed either here or directly in events.pde
@@ -16,7 +16,7 @@ These Flight Modes can be changed either here or directly in events.pde
 	LAND			= You must specify the landing waypoints in this header - read the manual
 */
 #define POSITION_1 MANUAL // the default, don't bother changing.
-#define POSITION_2 STABILIZE
+#define POSITION_2 QUAD_MAN
 #define POSITION_3 FLY_BY_WIRE_A
 // So why isn't AUTO here by default? Well, please try and run Stabilize first, 
 // then FLY_BY_WIRE_A to verify you have good gains set up correctly 
@@ -39,6 +39,7 @@ These Flight Modes can be changed either here or directly in events.pde
 
 /***************************************/
 //HARDWARE CONFIGURATION
+#define QUAD_COPTER 1           // If this is a QuadCopter Configuration, set this to 1, otherwise, 0
 #define SHIELD_VERSION 	1		// Old (red) shield versions is 0, the new (blue) shield version is 1, -1 = no shield
 #define AIRSPEED_SENSOR 0 		// (boolean) Do you have an airspeed sensor attached? 1= yes, 0 = no.
 
@@ -78,7 +79,8 @@ These Flight Modes can be changed either here or directly in events.pde
 
 /***************************************/
 // RADIO
-#define THROTTLE_PIN 11			// pin 13, or pin 11 only (13 was old default, 11 is a better choice for most people)
+#define THROTTLE_PIN 13			// pin 13, or pin 11 only (13 was old default, 11 is a better choice for most people)
+								// The wiki said to connect throttle to D13 (digital pin 13). We could change this back to 11 if it matters
 #define THROTTLE_OUT 1			// For debugging - 0 = no throttle, 1 = normal throttle
 #define THROTTLE_FAILSAFE 0 	// Do you want to react to a throttle failsafe condition? Default is no 0, Yes is 1
 #define THROTTLE_FS_VALUE 975	// (microseconds) What value to trigger failsafe 
