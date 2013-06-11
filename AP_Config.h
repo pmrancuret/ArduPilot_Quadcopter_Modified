@@ -1,6 +1,6 @@
 /* ArduPilot 2.7.1 Header file : July 23, 2010 */
 // Testing comments
-
+// Can you see me? Testing GIT
 /*
 These Flight Modes can be changed either here or directly in events.pde
 	
