@@ -1,7 +1,6 @@
 /* ArduPilot 2.7.1 Header file : July 23, 2010 */
 // Testing comments
-// Can you see me? Testing GIT
-// Can I use git push master origin (or origin master)?
+
 /*
 These Flight Modes can be changed either here or directly in events.pde
 	
@@ -16,9 +15,9 @@ These Flight Modes can be changed either here or directly in events.pde
 	TAKEOFF			= full throttle with desired pitch, stabilized roll
 	LAND			= You must specify the landing waypoints in this header - read the manual
 */
-#define POSITION_1 MANUAL // the default, don't bother changing.
-#define POSITION_2 QUAD_MAN
-#define POSITION_3 FLY_BY_WIRE_A
+#define POSITION_1 QUAD_SAFE // the default, don't bother changing.
+#define POSITION_2 QUAD_SAFE
+#define POSITION_3 QUAD_MAN
 // So why isn't AUTO here by default? Well, please try and run Stabilize first, 
 // then FLY_BY_WIRE_A to verify you have good gains set up correctly 
 // before you try Auto and wreck your plane. I'll sleep better that way...
@@ -44,7 +43,7 @@ These Flight Modes can be changed either here or directly in events.pde
 #define SHIELD_VERSION 	1		// Old (red) shield versions is 0, the new (blue) shield version is 1, -1 = no shield
 #define AIRSPEED_SENSOR 0 		// (boolean) Do you have an airspeed sensor attached? 1= yes, 0 = no.
 
-#define GPS_PROTOCOL 	3		// 0 = NMEA
+#define GPS_PROTOCOL 	-1		// 0 = NMEA
 								// 1 = SIRF, 
 								// 2 = uBlox
 								// 3 = ArduIMU

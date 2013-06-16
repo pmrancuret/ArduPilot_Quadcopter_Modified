@@ -334,6 +334,7 @@ extern void set_ch4_degrees(float deg);
 extern void set_servo_mux(boolean mode);
 extern void update_throttle();
 extern void demo_servos();
+extern void set_pwms_and_mux_quad();
 extern void init_PWM();
 
 // functions from system.pde
@@ -347,6 +348,7 @@ extern void print_waypoints();
 extern void setGPSMux(void);
 extern byte startup_check(void);
 extern void startup_ground(void);
+extern void startup_ground_quad(void);
 
 // functions from timing.pde
 extern unsigned long DIYmillis();

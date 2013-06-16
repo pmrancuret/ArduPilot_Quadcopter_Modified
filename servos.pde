@@ -18,6 +18,21 @@ void demo_servos()
 	delay(30);
 }
 
+void set_pwms_and_mux_quad()
+{
+	set_servo_mux(true);
+	OCR1A = 1100 * 2;
+	OCR1B = 1100 * 2;
+    uint16_t timer_out 	= 1100 % 512;
+    timer_ovf_b 		= 1100 / 512;
+    timer_ovf_a 		= 1100 / 512;
+    timer_out >>= 1;
+    OCR2A = timer_out;
+    OCR2B = timer_out;
+	delay(30);
+	set_servo_mux(true);
+}
+
 void set_servo_mux(boolean mode)
 {
 	while(TCNT1 < 20000){};

@@ -62,7 +62,8 @@
 #define TAKEOFF 13
 #define LAND 14
 
-#define QUAD_MAN 15
+#define QUAD_SAFE 15
+#define QUAD_MAN  16
 
 // Waypoint Modes
 // ----------------

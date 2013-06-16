@@ -427,7 +427,7 @@ void slow_loop()
 
 void update_GPS(void)
 {
-	#if GPS_PROTOCOL != 3
+	#if GPS_PROTOCOL != -1
 	decode_gps();
 	#endif
 
@@ -569,6 +569,13 @@ void update_current_flight_mode(void)
 			if (failsafe == true){
 				servo_out[CH_THROTTLE] = THROTTLE_CRUISE;
 			}
+			break;
+
+		case QUAD_SAFE:
+			servo_out[CH_ROLL]  = 1100;
+			servo_out[CH_PITCH] = 1100;
+			servo_out[CH_THROTTLE]  = 1100;
+			servo_out[CH_RUDDER] = 1100;
 			break;
 
 		case QUAD_MAN:

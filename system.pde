@@ -50,7 +50,12 @@ void init_ardupilot()
 	// p1				// PD1 - TXD  		- Serial TX 
 	pinMode(2,INPUT);	// PD2 - INT0 		- Rudder in							- INPUT Rudder/Aileron
 	pinMode(3,INPUT);	// PD3 - INT1 		- Elevator in 						- INPUT Elevator
+#if QUAD_COPTER == 1
+	pinMode(4,OUTPUT);  // PD4 - XCK/TO     - MUX pin
+	digitalWrite(4,HIGH);  // Set the Mux to non-feedthrough mode
+#else
 	pinMode(4,INPUT);	// PD4 - XCK/T0 	- MUX pin							- Connected to Pin 2 on ATtiny
+#endif
 	pinMode(5,INPUT);	// PD5 - T0			- Mode pin							- Connected to Pin 6 on ATtiny   - Select on MUX
 	pinMode(6,OUTPUT);	// PD6 - T1			- Ground start signaling Pin	
 	pinMode(7,OUTPUT);	// PD7 - AIN0		- GPS Mux pin 
@@ -107,6 +112,10 @@ void init_ardupilot()
 	Serial.print("freeRAM: ");
 	Serial.println(freeRAM(),DEC);
 	
+#if QUAD_COPTER == 1
+	Serial.println("In QuadCopter Mode. Setting MUX to non-feedthrough.");
+	startup_ground_quad();
+#else
 	if(startup_check()){
 		Serial.println("MSG Startup: Ground");
 		startup_ground();
@@ -121,6 +130,7 @@ void init_ardupilot()
 		load_waypoint();
 		startup_air_event();
 	}
+#endif
 }
 
 byte startup_check(void){
@@ -208,6 +218,73 @@ void startup_ground(void)
 	Serial.println("MSG Ready to FLY. ");
 }
 
+//********************************************************************************
+//This function does all the calibrations, etc. that we need during a ground start
+//for quad copter operation.
+//********************************************************************************
+void startup_ground_quad(void)
+{
+	#if USE_AUTO_LAUNCH == 1
+		takeoff_complete	= false;			// Flag for using take-off controls
+	#else
+		takeoff_complete	= true;
+	#endif
+
+	// Configure GPS
+	// -------------
+	//init_gps();
+
+	// Output waypoints for confirmation
+	// --------------------------------
+	print_waypoints();
+
+	//Signal the IMU to perform ground start
+	//------------------------
+	digitalWrite(6,LOW);
+
+	// Don't make the servos wiggle
+	// Speed Controls will do their audible signal
+	// Just set PWMs to 1000 and set the mux to non-feedthrough setting
+	// step 1 = 1 wiggle
+	// -----------------------
+	set_pwms_and_mux_quad();
+
+	// set a default reasonable ir_max val
+	// -----------------------------------
+	ir_max = 150;
+
+	// read the radio to set trims
+	// ---------------------------
+	trim_radio();
+
+#if SET_RADIO_LIMITS == 1
+	read_radio_limits();
+#endif
+#if AIRSPEED_SENSOR == 1
+	// initialize airspeed sensor
+	// --------------------------
+	zero_airspeed();
+#else
+	//Serial.println("NO airspeed");
+#endif
+
+	// Number of reads before saving Home position
+	// -------------------------------------------
+	ground_start_count = 6;
+
+	// Save the settings for in-air restart
+	// ------------------------------------
+	save_EEPROM_groundstart();
+
+	// Lower signal pin in case of IMU power glitch
+	// --------------------------------------------
+	digitalWrite(6,HIGH);
+
+	print_launch_params();
+
+	Serial.println(" ");
+	Serial.println("MSG Ready to FLY. ");
+}
 
 void set_mode(byte mode)
 {
