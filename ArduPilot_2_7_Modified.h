@@ -47,6 +47,7 @@ extern int16_t radio_max[4];	// may be reset by init sequence
 extern int16_t radio_in[4];			// current values from the transmitter - microseconds
 extern int16_t radio_out[4];			// PWM to ROLL PITCH Servos
 extern float servo_out[4];						// current values to the servos - -45 to 45 degrees, except [3] is 0 to 100
+extern int16_t quadmot_out[4];			// four quad-motor commands.  Motors numbered in clockwise order, corresponding to channel number.  Elements of this array correspond to channel out when connected as quad copter.
 
 extern int16_t elevon1_trim;
 extern int16_t elevon2_trim;
@@ -249,6 +250,7 @@ extern void update_GPS(void);
 extern void update_navigation();
 
 // functions from attitude.pde
+extern void quad_trackrollpitch(void);
 extern void calc_nav_pitch();
 extern void calc_nav_roll();
 extern void calc_throttle();

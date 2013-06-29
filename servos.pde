@@ -49,17 +49,91 @@ void set_servo_mux(boolean mode)
 // wants +- 45°
 void set_servos_4()
 {
+
 #if QUAD_COPTER==1
-   OCR1A=servo_out[CH_THROTTLE]*2;
-   OCR1B=servo_out[CH_THROTTLE]*2;
-   radio_out[CH_THROTTLE]=(float)servo_out[CH_THROTTLE];
-   uint16_t timer_out 	= radio_out[CH_THROTTLE] % 512; 
-   timer_ovf_b 		= radio_out[CH_THROTTLE] / 512;
-   timer_ovf_a 		= radio_out[CH_THROTTLE] / 512;
-   timer_out >>= 1;
-   OCR2A = timer_out;
-   OCR2B = timer_out;
+	int16_t yaw_differential;
+	int16_t roll_differential;
+	int16_t pitch_differential;
+
+	/* 	start calculations with all four motors equal to throttle channel input.
+	 * 	Note that while servo_out is a floating point value, the CH_THROTTLE element
+	 *  holds an integer value for throttle command (generally between 1000 and 2000).
+	 *
+	 *  The other three elements of servo_out contain floating point numbers between
+	 *  -45 and 45, corresponding to "servo" positions for roll, pitch, and yaw.
+	 *
+	 *  In contrast, the quadmot_out[] array simply contains the actual integer throttle
+	 *  commands going to each of the four motors.  These are generally limited between
+	 *  1000 and 2000.
+	 */
+	quadmot_out[MOTOR0] = servo_out[CH_THROTTLE];	// Begin with motor 0 set equal to throttle command
+	quadmot_out[MOTOR1] = servo_out[CH_THROTTLE];	// Begin with motor 1 set equal to throttle command
+	quadmot_out[MOTOR2] = servo_out[CH_THROTTLE];	// Begin with motor 2 set equal to throttle command
+	quadmot_out[MOTOR3] = servo_out[CH_THROTTLE];	// Begin with motor 3 set equal to throttle command
+
+	// first apply yaw differential to motor commands
+	yaw_differential = (int16_t)(servo_out[CH_RUDDER] * QUADYAW_GAIN);
+	quadmot_out[MOTOR0] += yaw_differential;
+	quadmot_out[MOTOR1] -= yaw_differential;
+	quadmot_out[MOTOR2] += yaw_differential;
+	quadmot_out[MOTOR3] -= yaw_differential;
+
+	// next apply roll differential to motor commands
+#if (QUADCONFIG_X == 0)	// if the quadrotor is in a '+' configuration
+	roll_differential = (int16_t)(servo_out[CH_ROLL] * QUADPITCHROLL_GAIN);
+	quadmot_out[MOTOR3] += roll_differential;
+	quadmot_out[MOTOR1] -= roll_differential;
+#else					// if the quadrotor is in an 'X' configuration
+	roll_differential = ((int16_t)(servo_out[CH_ROLL] * QUADPITCHROLL_GAIN)) << 1;
+	quadmot_out[MOTOR0] += roll_differential;
+	quadmot_out[MOTOR3] += roll_differential;
+	quadmot_out[MOTOR1] -= roll_differential;
+	quadmot_out[MOTOR2] -= roll_differential;
+#endif
+
+	// next apply pitch differential to motor commands
+#if (QUADCONFIG_X == 0)	// if the quadrotor is in a '+' configuration
+	pitch_differential = (int16_t)(servo_out[CH_PITCH] * QUADPITCHROLL_GAIN);
+	quadmot_out[MOTOR0] += pitch_differential;
+	quadmot_out[MOTOR2] -= pitch_differential;
+#else					// if the quadrotor is in an 'X' configuration
+	pitch_differential = ((int16_t)(servo_out[CH_PITCH] * QUADPITCHROLL_GAIN)) << 1;
+	quadmot_out[MOTOR0] += pitch_differential;
+	quadmot_out[MOTOR1] += pitch_differential;
+	quadmot_out[MOTOR2] -= pitch_differential;
+	quadmot_out[MOTOR3] -= pitch_differential;
+#endif
+
+	// last constrain the calculated motor commands to remain between 1000 and 2000
+	quadmot_out[MOTOR0] = constrain(quadmot_out[MOTOR0],1000,2000);
+	quadmot_out[MOTOR1] = constrain(quadmot_out[MOTOR1],1000,2000);
+	quadmot_out[MOTOR2] = constrain(quadmot_out[MOTOR2],1000,2000);
+	quadmot_out[MOTOR3] = constrain(quadmot_out[MOTOR3],1000,2000);
+
+	/*
+	 * OCR1A compare value corresponds to Motor 0 output
+	 * OCR1B compare value corresponds to Motor 1 output
+	 * OCR2A compare value corresponds to Motor 2 output
+	 * OCR2B compare value corresponds to Motor 3 output
+	 */
+	// first set Motor 0 pwm output compare
+   OCR1A=quadmot_out[MOTOR0]<<1;	// <<1 is a faster way to say *2 for integer
+
+   // next set Motor 1 pwm output compare
+   OCR1B=quadmot_out[MOTOR1]<<1;	// <<1 is a faster way to say *2 for integer
    
+   // next set Motor 2 pwm output compare - this low resolution timer will overflow a certain number of times before counting the correct amount
+   uint16_t timer_out_a 	= quadmot_out[MOTOR2] % 512;	// calculate the compare value -> remainder after correct number of overflows
+   timer_ovf_a 		= quadmot_out[MOTOR2] / 512;			// calculate the correct number of overflows to allow
+   timer_out_a >>= 1;										// divide compare value by 2
+   OCR2A = timer_out_a;										// set compare value
+
+   // last set Motor 3 pwm output compare - this low resolution timer will overflow a certain number of times before counting the correct amount
+   uint16_t timer_out_b 	= quadmot_out[MOTOR3] % 512;	// calculate the compare value -> remainder after correct number of overflows
+   timer_ovf_b 		= quadmot_out[MOTOR3] / 512;			// calculate the correct number of overflows to allow
+   timer_out_b >>= 1;										// divide compare value by 2
+   OCR2B = timer_out_b;										// set compare value
+
 #else
 
 	#if GPS_PROTOCOL == 3

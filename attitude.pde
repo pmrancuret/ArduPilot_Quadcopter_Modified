@@ -4,6 +4,25 @@
 // Function that controls aileron/rudder, elevator, rudder (if 4 channel control) and throttle to produce desired attitude and airspeed.
 //****************************************************************
 
+/*
+ * quad_trackrollpitch().  This function is called when in the QUAD_CLOSELOOP control
+ * mode.  It treats the roll and pitch inputs from the radio as desired physical
+ * roll and pitch angles.  PID control loops are used to adjust the servo_out[] values
+ * for roll and pitch in order to maintain the desired roll and pitch angles.
+ */
+void quad_trackrollpitch(void)
+{
+	long ReferenceRoll;			// Reference roll angle, in degrees * 100
+	long ReferencePitch;		// Reference pitch angle, in degrees * 100
+
+	ReferenceRoll  = ((long)(radio_in[CH_ROLL]  - radio_trim[CH_ROLL]) * 9  * REVERSE_ROLL);		// floating point value of reference roll command - between -45 and 45 degrees
+	ReferencePitch = ((long)(radio_in[CH_PITCH] - radio_trim[CH_PITCH]) * 9 * REVERSE_PITCH);		// floating point value of reference pitch command - between -45 and 45 degrees
+
+	servo_out[CH_ROLL]	= PID((ReferenceRoll - roll_sensor), deltaMiliSeconds, CASE_SERVO_ROLL);
+	servo_out[CH_PITCH] = PID((ReferencePitch + abs(roll_sensor * PITCH_COMP) - pitch_sensor), deltaMiliSeconds, CASE_SERVO_PITCH);
+
+}
+
 void stabilize()
 {
 	float ch1_inf = 1.0;

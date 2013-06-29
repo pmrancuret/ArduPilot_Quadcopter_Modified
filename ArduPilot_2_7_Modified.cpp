@@ -39,7 +39,7 @@ Beta Testers:
 
 // GENERAL VARIABLE DECLARATIONS
 // --------------------------------------------
-byte 	control_mode		= MANUAL;
+byte 	control_mode		= QUAD_SAFE;
 boolean failsafe			= false;	// did our throttle dip below the failsafe value?
 boolean ch3_failsafe		= false;
 //byte 	config_tool_options	= 0;		// a bitmask defining config tool options such as altitude hold
@@ -60,6 +60,7 @@ int16_t radio_max[] 	= {CH1_MAX, CH2_MAX, CH3_MAX, CH4_MAX};	// may be reset by 
 int16_t radio_in[]		= {1500,1500,1100,1500};			// current values from the transmitter - microseconds
 int16_t radio_out[]		= {1500,1500,1100,1500};			// PWM to ROLL PITCH Servos
 float servo_out[] 	= {0,0,0,0};						// current values to the servos - -45 to 45 degrees, except [3] is 0 to 100
+int16_t quadmot_out[]	= {1100,1100,1100,1100};			// four quad-motor commands.  Motors numbered in clockwise order, corresponding to channel number.  Elements of this array correspond to channel out when connected as quad copter.
 
 int16_t elevon1_trim 	= 1500;
 int16_t elevon2_trim 	= 1500;
@@ -316,7 +317,7 @@ void fast_loop()
 
 	// apply desired roll, pitch and yaw to the plane
 	// ----------------------------------------------
-	if (control_mode > MANUAL)
+	if (control_mode > MANUAL)		// PMR now that QUAD_SAFE and QUAD_MAN are lower numbers than MANUAL, the stabilize function won't be called in those modes either
 		stabilize();
 
 	// write out the servo PWM values
@@ -572,17 +573,23 @@ void update_current_flight_mode(void)
 			break;
 
 		case QUAD_SAFE:
-			servo_out[CH_ROLL]  = 1100;
-			servo_out[CH_PITCH] = 1100;
-			servo_out[CH_THROTTLE]  = 1100;
-			servo_out[CH_RUDDER] = 1100;
+			servo_out[CH_ROLL]  = 0;			// floating point value of roll "servo" command - between -45 and 45 degrees
+			servo_out[CH_PITCH] = 0;			// floating point value of pitch "servo" command - between -45 and 45 degrees
+			servo_out[CH_THROTTLE]  = 1100;		// even though servo_out is a float - this number should just hold the integer throttle stick command.  It is different from the roll, pitch, and yaw "servo" commands
+			servo_out[CH_RUDDER] = 0;			// floating point value of yaw "servo" command - between -45 and 45 degrees
 			break;
 
 		case QUAD_MAN:
-			servo_out[CH_ROLL]  = radio_in[CH_ROLL];
-			servo_out[CH_PITCH] = radio_in[CH_PITCH];
-			servo_out[CH_THROTTLE]  = radio_in[CH_THROTTLE];
-			servo_out[CH_RUDDER] = radio_in[CH_RUDDER];
+			servo_out[CH_ROLL]  = ((radio_in[CH_ROLL]  - radio_trim[CH_ROLL]) * 45  * REVERSE_ROLL) / 500;		// floating point value of roll "servo" command - between -45 and 45 degrees
+			servo_out[CH_PITCH] = ((radio_in[CH_PITCH] - radio_trim[CH_PITCH]) * 45 * REVERSE_PITCH) / 500;		// floating point value of pitch "servo" command - between -45 and 45 degrees
+			servo_out[CH_THROTTLE]  = radio_in[CH_THROTTLE];													// even though servo_out is a float - this number should just hold the integer throttle stick command.  It is different from the roll, pitch, and yaw "servo" commands
+			servo_out[CH_RUDDER] = ((radio_in[CH_RUDDER] - radio_trim[CH_RUDDER]) * 45 * REVERSE_RUDDER) / 500;	// floating point value of yaw "servo" command - between -45 and 45 degrees
+			break;
+
+		case QUAD_CLOSELOOP:
+			quad_trackrollpitch();
+			servo_out[CH_THROTTLE]  = radio_in[CH_THROTTLE];													// even though servo_out is a float - this number should just hold the integer throttle stick command.  It is different from the roll, pitch, and yaw "servo" commands
+			servo_out[CH_RUDDER] = ((radio_in[CH_RUDDER] - radio_trim[CH_RUDDER]) * 45 * REVERSE_RUDDER) / 500;	// floating point value of yaw "servo" command - between -45 and 45 degrees
 			break;
 
 		case MANUAL:
