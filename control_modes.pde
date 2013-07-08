@@ -45,22 +45,60 @@ void reset_control_switch()
 }
 
 byte readSwitch(void){
+	static uint16_t counter = 0;
+	static uint16_t laststate = INITIAL_POS;
+
 	if(digitalRead(4) == HIGH){
 		if(digitalRead(5) == HIGH){
 
+			if (laststate != 2) counter++;
+
 			// Middle Switch Position
 			// ----------------------
-			return 2;
+			if (counter >= NUMCOUNTS_POS2)
+			{
+				laststate = 2;
+				counter = 0;
+				return 2;
+			}
+			else
+			{
+				return laststate;
+			}
 
 		}else{
+
+			if (laststate != 3) counter++;
+
 			// 3rd Switch Position
 			// -------------------
-			return 3;
+			if (counter >= NUMCOUNTS_POS3)
+			{
+				laststate = 3;
+				counter = 0;
+				return 3;
+			}
+			else
+			{
+				return laststate;
+			}
 		}
 	}else{
+
+		if (laststate != 1) counter++;
+
 		// 1st Switch Position
 		// ----------------------
-		return 1;
+		if (counter >= NUMCOUNTS_POS1)
+		{
+			laststate = 1;
+			counter = 0;
+			return 1;
+		}
+		else
+		{
+			return laststate;
+		}
 	}
 }
 

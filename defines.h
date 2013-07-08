@@ -26,6 +26,38 @@
 #define CH_THROTTLE 2
 #define CH_RUDDER 3
 
+// Motor numbers
+#define MOTOR0	0
+#define	MOTOR1	1
+#define MOTOR2	2
+#define MOTOR3	3
+
+// gains for "servo" angles - how they affect relative motor speeds
+#define QUADPITCHROLL_GAIN	2.0f		// How much throttle differential is given from one side to the other per degree of roll or pitch servo angle.  For instance, a value of 10 will result in a swing of +- 450 throttle command on opposite motors, given a 45 degree pitch or roll "servo" angle.  Probably don't want to use anything higher than 10, smaller sounds better.  Can be a floating point number.
+#define QUADYAW_GAIN		2.0f		// How much throttle differential is given from cross-motor pair to the other per degree of yaw servo angle.  For instance, a value of 10 will result in a swing of +- 450 throttle command on opposite diagonal pair motors, given a 45 degree pitch or roll "servo" angle.  Probably don't want to use anything higher than 10, smaller sounds better.  Can be a floating point number.
+
+// Motor Configuration
+#define	QUADCONFIG_X	0	/* 	When this is set to zero, the quad-copter is configured so that
+							 *	MOTOR0 is in the front, MOTOR1 is on the right, MOTOR2 is in
+							 *	the rear, and MOTOR3 is on the left.  These orientations are
+							 *	relative to the craft moving forward.
+							 *
+							 *	When this is set to one, the quad-copter is configured so that
+							 *	MOTOR0 is in the upper-left, MOTOR1 is in the upper-right,
+							 *	MOTOR2 is in the lower-right, and MOTOR3 is in the lower-left.
+							 *	Again, these orientations are relative to the craft moving
+							 *	forward.
+							 *
+							 *	So, when QUADCONFIG_X is 0, the craft is configured in a '+'
+							 *	shape, and when QUADCONFIG_X is 1, the craft is configured in
+							 *	an 'X' shape.  This changes how servo_out[] channels are mixed
+							 *	to generate the appropriate quadmot_out[] commands.
+							 *
+							 *	The accelerometer/IMU should be mounted in a manner which matches
+							 *	this setting.
+							 */
+
+
 #define WP_START_BYTE 0x18		// where in memory home WP is stored + all other WP
 #define WP_SIZE 10
 #define IR_MAX_FIX .88
@@ -49,21 +81,24 @@
 
 // Auto Pilot modes
 // ----------------
-#define MANUAL 0
-#define CIRCLE 1			 // When flying sans GPS, and we loose the radio, just circle
-#define STABILIZE 2
+#define QUAD_SAFE 0			// moved quad_safe to number 0 - starting mode
+#define QUAD_MAN  1			// moved quad_man to number 1
+#define QUAD_CLOSELOOP 2	// closed loop control of quadcopter.  In this mode - roll, pitch, and yaw stick inputs are taken as commands for roll, pitch, and yaw angles.  A PID control loop is used to adjust servo_out[] values in order to achieve these desired angles.
+#define MANUAL 3			// regular manual (stick to surface) mode is 2 - the stabilize function occurs in modes greater than this - so stabilize will not occur in QUAD_SAFE and QUAD_MAN modes
 
 #define FLY_BY_WIRE_A 5		// Fly By Wire A has left stick horizontal => desired roll angle, left stick vertical => desired pitch angle, right stick vertical = manual throttle
 #define FLY_BY_WIRE_B 6		// Fly By Wire B has left stick horizontal => desired roll angle, left stick vertical => desired pitch angle, right stick vertical => desired airspeed
 							// Fly By Wire B = Fly By Wire A if you have AIRSPEED_SENSOR 0
+
+#define CIRCLE 7			 // When flying sans GPS, and we loose the radio, just circle
+#define STABILIZE 8
+
 #define AUTO 10
 #define RTL 11
 #define LOITER 12
 #define TAKEOFF 13
 #define LAND 14
 
-#define QUAD_SAFE 15
-#define QUAD_MAN  16
 
 // Waypoint Modes
 // ----------------

@@ -15,9 +15,16 @@ These Flight Modes can be changed either here or directly in events.pde
 	TAKEOFF			= full throttle with desired pitch, stabilized roll
 	LAND			= You must specify the landing waypoints in this header - read the manual
 */
+
+// define number of slow loop counts (3 1/3 Hz) to require reading consecutively with a new position before entering that new position
+#define NUMCOUNTS_POS1 	2
+#define NUMCOUNTS_POS2 	7
+#define NUMCOUNTS_POS3 	2
+#define INITIAL_POS		3
+
 #define POSITION_1 QUAD_SAFE // the default, don't bother changing.
-#define POSITION_2 QUAD_SAFE
-#define POSITION_3 QUAD_MAN
+#define POSITION_2 QUAD_MAN
+#define POSITION_3 QUAD_SAFE
 // So why isn't AUTO here by default? Well, please try and run Stabilize first, 
 // then FLY_BY_WIRE_A to verify you have good gains set up correctly 
 // before you try Auto and wreck your plane. I'll sleep better that way...

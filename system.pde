@@ -114,7 +114,10 @@ void init_ardupilot()
 	
 #if QUAD_COPTER == 1
 	Serial.println("In QuadCopter Mode. Setting MUX to non-feedthrough.");
-	startup_ground_quad();
+	if(startup_check()){
+		Serial.println("MSG Startup: Ground");
+		startup_ground_quad();
+	}
 #else
 	if(startup_check()){
 		Serial.println("MSG Startup: Ground");
