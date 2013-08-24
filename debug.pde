@@ -234,12 +234,19 @@ void debug_subsystem()
 		decode_gps();
 		Serial.print("  roll:");
 		Serial.print(roll_sensor/100,DEC);	
-		Serial.print("  pitch:");
+		Serial.print("\t pitch:");
 		Serial.print(pitch_sensor/100,DEC);
-		Serial.print("  course:");
-		Serial.println(ground_course/100,DEC);
-
-
+		Serial.print("\t yaw:");
+		Serial.print(ground_course/100,DEC);
+            #if GET_RATES_FROM_IMU == 1
+		Serial.print("\t roll rate:");
+		Serial.print(roll_rate_sensor/10,DEC);	
+		Serial.print("\t pitch rate:");
+		Serial.print(pitch_rate_sensor/10,DEC);
+		Serial.print("\t yaw rate:");
+		Serial.print(yaw_rate_sensor/10,DEC);
+            #endif
+                Serial.println("--END--");
 		if (GPS_new_data){
 			Serial.print("Lat:");
 			Serial.print(current_loc.lat,DEC);
@@ -250,9 +257,9 @@ void debug_subsystem()
 			Serial.print("m, gs: ");
 			Serial.print(ground_speed/100,DEC);
 			Serial.print(" TIM:");
-			Serial.print(iTOW,DEC);
-			Serial.print(" Health:");
-			Serial.println(imu_health,DEC);
+			Serial.println(iTOW,DEC);
+//			Serial.print(" Health:");
+//			Serial.println(imu_health,DEC);
 		}
 	}
 }

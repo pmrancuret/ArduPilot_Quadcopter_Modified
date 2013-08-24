@@ -37,7 +37,7 @@
 #define QUADYAW_GAIN		2.0f		// How much throttle differential is given from cross-motor pair to the other per degree of yaw servo angle.  For instance, a value of 10 will result in a swing of +- 450 throttle command on opposite diagonal pair motors, given a 45 degree pitch or roll "servo" angle.  Probably don't want to use anything higher than 10, smaller sounds better.  Can be a floating point number.
 
 // Motor Configuration
-#define	QUADCONFIG_X	0	/* 	When this is set to zero, the quad-copter is configured so that
+#define	QUADCONFIG_X	1	/* 	When this is set to zero, the quad-copter is configured so that
 							 *	MOTOR0 is in the front, MOTOR1 is on the right, MOTOR2 is in
 							 *	the rear, and MOTOR3 is on the left.  These orientations are
 							 *	relative to the craft moving forward.
@@ -84,7 +84,8 @@
 #define QUAD_SAFE 0			// moved quad_safe to number 0 - starting mode
 #define QUAD_MAN  1			// moved quad_man to number 1
 #define QUAD_CLOSELOOP 2	// closed loop control of quadcopter.  In this mode - roll, pitch, and yaw stick inputs are taken as commands for roll, pitch, and yaw angles.  A PID control loop is used to adjust servo_out[] values in order to achieve these desired angles.
-#define MANUAL 3			// regular manual (stick to surface) mode is 2 - the stabilize function occurs in modes greater than this - so stabilize will not occur in QUAD_SAFE and QUAD_MAN modes
+#define QUAD_CLOSELOOP_RATES 3	// closed loop control of quadcopter.  In this mode - roll, pitch, and yaw stick inputs are taken as commands for roll, pitch, and yaw angles.  A PID control loop is used to adjust servo_out[] values in order to achieve these desired angles.
+#define MANUAL 4			// regular manual (stick to surface) mode is 2 - the stabilize function occurs in modes greater than this - so stabilize will not occur in QUAD_SAFE and QUAD_MAN modes
 
 #define FLY_BY_WIRE_A 5		// Fly By Wire A has left stick horizontal => desired roll angle, left stick vertical => desired pitch angle, right stick vertical = manual throttle
 #define FLY_BY_WIRE_B 6		// Fly By Wire B has left stick horizontal => desired roll angle, left stick vertical => desired pitch angle, right stick vertical => desired airspeed

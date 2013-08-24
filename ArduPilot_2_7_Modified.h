@@ -156,6 +156,9 @@ extern int ir_max;		// used to scale Thermopile output to 511
 extern int ir_max_save;		// used to scale Thermopile output to 511
 extern long roll_sensor;		// how much we're turning in deg * 100
 extern long pitch_sensor;		// our angle of attack in deg * 100
+extern long roll_rate_sensor;		// how fast we're rolling in deg/s * 10
+extern long pitch_rate_sensor;		// how fast we're pitching in deg/s * 10
+extern long yaw_rate_sensor;		// how fast we're yawing in deg/s * 10
 
 
 // Performance

@@ -12,15 +12,59 @@
  */
 void quad_trackrollpitch(void)
 {
-	long ReferenceRoll;			// Reference roll angle, in degrees * 100
-	long ReferencePitch;		// Reference pitch angle, in degrees * 100
+  long ReferenceRoll;  // Reference roll angle, in degrees * 100
+  long ReferencePitch; // Reference pitch angle, in degrees * 100
 
-	ReferenceRoll  = ((long)(radio_in[CH_ROLL]  - radio_trim[CH_ROLL]) * 9  * REVERSE_ROLL);		// floating point value of reference roll command - between -45 and 45 degrees
-	ReferencePitch = ((long)(radio_in[CH_PITCH] - radio_trim[CH_PITCH]) * 9 * REVERSE_PITCH);		// floating point value of reference pitch command - between -45 and 45 degrees
+  ReferenceRoll  = ((long)(radio_in[CH_ROLL]  - radio_trim[CH_ROLL]) * 9 * REVERSE_ROLL);// floating point value of reference roll command - between -45 and 45 degrees
+ #if DEBUG_INFLIGHT == 1
+  Serial.print("  RadioTrim: ");
+  Serial.print(radio_trim[CH_ROLL]);
+  Serial.print("  AngleSetPoint: ");
+  Serial.print(ReferenceRoll/100,DEC);
+ #endif
+  ReferencePitch = ((long)(radio_in[CH_PITCH] - radio_trim[CH_PITCH]) * 9 * REVERSE_PITCH);// floating point value of reference pitch command - between -45 and 45 degrees
 
-	servo_out[CH_ROLL]	= PID((ReferenceRoll - roll_sensor), deltaMiliSeconds, CASE_SERVO_ROLL);
-	servo_out[CH_PITCH] = PID((ReferencePitch + abs(roll_sensor * PITCH_COMP) - pitch_sensor), deltaMiliSeconds, CASE_SERVO_PITCH);
+  servo_out[CH_ROLL]  = PID((ReferenceRoll  - roll_sensor), deltaMiliSeconds, CASE_SERVO_ROLL);
+  servo_out[CH_PITCH] = PID((ReferencePitch - pitch_sensor), deltaMiliSeconds, CASE_SERVO_PITCH);
+  
+ #if DEBUG_INFLIGHT == 1
+  Serial.print("  SensorAngle: ");
+  Serial.print(roll_sensor/100,DEC);
+  Serial.print("  StickPosition: ");
+  Serial.print(servo_out[CH_ROLL],2);
+ #endif
+}
 
+/*
+ * quad_trackrollpitchrate().  This function is called when in the QUAD_CLOSELOOP control
+ * mode.  It treats the roll and pitch inputs from the radio as desired physical
+ * roll and pitch rates.  PID control loops are used to adjust the servo_out[] values
+ * for roll and pitch in order to maintain the desired roll and pitch rates.
+ */
+void quad_trackrollpitchrate(void)
+{
+  long ReferenceRollRate;  // Reference roll rate, in deg/s * 10
+  long ReferencePitchRate; // Reference pitch rate, in deg/s * 10
+  long ReferenceYawRate; // Reference yaw rate, in deg/s * 10
+
+  ReferenceRollRate  = (long)((radio_in[CH_ROLL]  - radio_trim[CH_ROLL]) * 0.3f * REVERSE_ROLL);// floating point value of reference roll rate command - between -15 and 15 deg/s
+  ReferencePitchRate = (long)((radio_in[CH_PITCH] - radio_trim[CH_PITCH]) * 0.3f * REVERSE_PITCH);// floating point value of reference pitch rate command - between -15 and 15 deg/s
+  ReferenceYawRate =   (long)((radio_in[CH_RUDDER] - radio_trim[CH_RUDDER]) * 0.3f * REVERSE_RUDDER);// floating point value of reference pitch rate command - between -15 and 15 deg/s
+
+  servo_out[CH_ROLL]  = PID((ReferenceRollRate  - roll_rate_sensor), deltaMiliSeconds, CASE_SERVO_ROLL);
+  servo_out[CH_PITCH] = PID((ReferencePitchRate - pitch_rate_sensor), deltaMiliSeconds, CASE_SERVO_PITCH);
+  servo_out[CH_RUDDER] = PID((ReferenceYawRate - yaw_rate_sensor), deltaMiliSeconds, CASE_SERVO_RUDDER);
+			
+ #if DEBUG_INFLIGHT == 1
+  Serial.print("  RadioTrim: ");
+  Serial.print(radio_trim[CH_ROLL]);
+  Serial.print("  RateSetPoint: ");
+  Serial.print(ReferenceRollRate/10,DEC);
+  Serial.print("  SensorRate: ");
+  Serial.print(roll_rate_sensor/10,DEC);
+  Serial.print("  EffStickPosition: ");
+  Serial.print(servo_out[CH_ROLL],2);
+ #endif
 }
 
 void stabilize()

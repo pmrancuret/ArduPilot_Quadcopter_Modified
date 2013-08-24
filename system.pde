@@ -136,17 +136,27 @@ void init_ardupilot()
 #endif
 }
 
-byte startup_check(void){
-	if(DEBUG_SUBSYSTEM > 0){
-		debug_subsystem();
-	}else{
-		if ((readSwitch() == 1) && (radio_in[CH_THROTTLE] < 1200)){
-			// we are in manual
-			return 1;
-		}else{
-			return 0;
-		}
-	}
+byte startup_check(void)
+{
+  if(DEBUG_SUBSYSTEM > 0)
+  {
+    debug_subsystem();
+  }
+  else
+  {
+    if ((radio_in[CH_THROTTLE] < 1200)) // && (readSwitch() == 1)
+    {   
+      // Throttle is safe
+      return 1;
+    }
+    else
+    {
+      while(1)
+      {
+        Serial.print("Warning: Throttle>1100 during startup. Will not continue");
+      }
+    }
+  }
 }
 
 //********************************************************************************

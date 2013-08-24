@@ -24,24 +24,26 @@ These Flight Modes can be changed either here or directly in events.pde
 
 #define POSITION_1 QUAD_SAFE // the default, don't bother changing.
 #define POSITION_2 QUAD_MAN
-#define POSITION_3 QUAD_SAFE
+#define POSITION_3 QUAD_CLOSELOOP_RATES
 // So why isn't AUTO here by default? Well, please try and run Stabilize first, 
 // then FLY_BY_WIRE_A to verify you have good gains set up correctly 
 // before you try Auto and wreck your plane. I'll sleep better that way...
 
-
 // Debug options - set only one of these options to 1 at a time, set the others to 0
 #define DEBUG_SUBSYSTEM 0 		// 0 = no debug
-								// 1 = Debug the Radio input
-								// 2 = Debug the Servo output
-								// 3 = Debug the Sensor input
-								// 4 = Debug the GPS input
-								// 5 = Debug the GPS input - RAW HEX OUTPUT
-								// 6 = Debug the IMU
-								// 7 = Debug the Control Switch
-								// 8 = Debug the Throttle
-								// 9 = Radio Min Max values
+					// 1 = Debug the Radio input
+					// 2 = Debug the Servo output
+					// 3 = Debug the Sensor input
+					// 4 = Debug the GPS input
+					// 5 = Debug the GPS input - RAW HEX OUTPUT
+					// 6 = Debug the IMU
+					// 7 = Debug the Control Switch
+					// 8 = Debug the Throttle
+					// 9 = Radio Min Max values
 
+#define DEBUG_INFLIGHT 1   // 0 = no debug
+			   // 1 = Debug Roll RadioIn, AngleSetPoint, StickPosition, RollDiffPwm
+			   // 2 = Debug Rate Reception From IMU
 
 
 /***************************************/
@@ -50,7 +52,7 @@ These Flight Modes can be changed either here or directly in events.pde
 #define SHIELD_VERSION 	1		// Old (red) shield versions is 0, the new (blue) shield version is 1, -1 = no shield
 #define AIRSPEED_SENSOR 0 		// (boolean) Do you have an airspeed sensor attached? 1= yes, 0 = no.
 
-#define GPS_PROTOCOL 	-1		// 0 = NMEA
+#define GPS_PROTOCOL 	3		// 0 = NMEA
 								// 1 = SIRF, 
 								// 2 = uBlox
 								// 3 = ArduIMU
@@ -64,6 +66,10 @@ These Flight Modes can be changed either here or directly in events.pde
 								// 3 = Xplane
 								// 5 = Jason's GCS, 
 								// -1 = no GCS (no telemtry output)
+/****************************************/
+// IMU settings:
+#define GET_RATES_FROM_IMU 1
+
 
 /***************************************/
 //Thermopile sensors:
@@ -75,6 +81,7 @@ These Flight Modes can be changed either here or directly in events.pde
 #define ROLL_TRIM 0				// deg * 100 : allows you to offset bad IR sensor placement
 #define AOA 0					// deg * 100 : the angle your plane flies at level - use the IMU to find this value.
 #define ALT_EST_GAIN .01		// the gain of the altitude estimation function, lower number = slower error correction and smoother output
+#define MIN_SPIN_PWM  1120
 
 
 /***************************************/
@@ -115,7 +122,7 @@ These Flight Modes can be changed either here or directly in events.pde
 #define MIXING_MODE 0			//Servo mixing mode 0 = Normal, 1 = Elevons (or v tail)
 
 // NOTE - IF USING ELEVONS, 1-2 AND 1-3 SHOULD BE 1
-#define REVERSE_ROLL 1			// To reverse roll, PUT -1 to reverse it
+#define REVERSE_ROLL -1			// To reverse roll, PUT -1 to reverse it
 #define REVERSE_PITCH 1			// To reverse pitch, PUT -1 to reverse it
 #define REVERSE_RUDDER 1		// To reverse rudder for 4 channel control setups
 

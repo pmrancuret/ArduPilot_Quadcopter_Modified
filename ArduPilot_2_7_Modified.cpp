@@ -40,21 +40,21 @@ Beta Testers:
 // GENERAL VARIABLE DECLARATIONS
 // --------------------------------------------
 byte 	control_mode		= QUAD_SAFE;
-boolean failsafe			= false;	// did our throttle dip below the failsafe value?
+boolean failsafe		= false;	// did our throttle dip below the failsafe value?
 boolean ch3_failsafe		= false;
 //byte 	config_tool_options	= 0;		// a bitmask defining config tool options such as altitude hold
 byte 	crash_timer			= 0;
 int 	egg_dist 			= 0;
 
 /* Radio values
-		Channel assignments
-			1	Ailerons (rudder if no ailerons)
-			2	Elevator
-			3	Throttle
-			4	Rudder (if we have ailerons)
+  Channel assignments
+   1 Ailerons (rudder if no ailerons)
+   2 Elevator
+   3 Throttle
+   4 Rudder (if we have ailerons)
 */
 int16_t radio_min[] 	= {CH1_MIN, CH2_MIN, CH3_MIN, CH4_MIN};	// may be reset by init sequence
-int16_t radio_trim[] 	= {0,0,0,0};							// may be reset by init sequence
+int16_t radio_trim[] 	= {0,0,0,0};                            // may be reset by init sequence
 int16_t radio_max[] 	= {CH1_MAX, CH2_MAX, CH3_MAX, CH4_MAX};	// may be reset by init sequence
 
 int16_t radio_in[]		= {1500,1500,1000,1500};			// current values from the transmitter - microseconds
@@ -156,6 +156,10 @@ int ir_max					= 300;		// used to scale Thermopile output to 511
 int ir_max_save				= 300;		// used to scale Thermopile output to 511
 long roll_sensor			= 0;		// how much we're turning in deg * 100
 long pitch_sensor			= 0;		// our angle of attack in deg * 100
+long roll_rate_sensor			= 0;		// how fast we're rolling in deg/s * 10
+long pitch_rate_sensor			= 0;		// how fast we're pitching in deg/s * 10
+long yaw_rate_sensor			= 0;		// how fast we're yawing in deg/s * 10
+
 
 
 // Performance
@@ -317,8 +321,9 @@ void fast_loop()
 
 	// apply desired roll, pitch and yaw to the plane
 	// ----------------------------------------------
-	if (control_mode > MANUAL)		// PMR now that QUAD_SAFE and QUAD_MAN are lower numbers than MANUAL, the stabilize function won't be called in those modes either
-		stabilize();
+	// PMR now that QUAD_SAFE and QUAD_MAN are lower numbers than MANUAL, the stabilize function won't be called in those modes either
+	if (control_mode > MANUAL)		
+        	stabilize();
 
 	// write out the servo PWM values
 	// ------------------------------
@@ -584,12 +589,27 @@ void update_current_flight_mode(void)
 			servo_out[CH_PITCH] = ((radio_in[CH_PITCH] - radio_trim[CH_PITCH]) * 45 * REVERSE_PITCH) / 500;		// floating point value of pitch "servo" command - between -45 and 45 degrees
 			servo_out[CH_THROTTLE]  = radio_in[CH_THROTTLE];													// even though servo_out is a float - this number should just hold the integer throttle stick command.  It is different from the roll, pitch, and yaw "servo" commands
 			servo_out[CH_RUDDER] = ((radio_in[CH_RUDDER] - radio_trim[CH_RUDDER]) * 45 * REVERSE_RUDDER) / 500;	// floating point value of yaw "servo" command - between -45 and 45 degrees
+                       #if DEBUG_INFLIGHT == 1
+                        Serial.print("  RadioTrim: ");
+                        Serial.print(radio_trim[CH_ROLL]);
+                        Serial.print("  RateSetPoint: ");
+                        Serial.print(999,DEC);
+                        Serial.print("  SensorRate: ");
+                        Serial.print(roll_rate_sensor/10,DEC);
+                        Serial.print("  EffStickPosition: ");
+                        Serial.print(servo_out[CH_ROLL],DEC);
+                       #endif
 			break;
 
 		case QUAD_CLOSELOOP:
 			quad_trackrollpitch();
 			servo_out[CH_THROTTLE]  = radio_in[CH_THROTTLE];													// even though servo_out is a float - this number should just hold the integer throttle stick command.  It is different from the roll, pitch, and yaw "servo" commands
 			servo_out[CH_RUDDER] = ((radio_in[CH_RUDDER] - radio_trim[CH_RUDDER]) * 45 * REVERSE_RUDDER) / 500;	// floating point value of yaw "servo" command - between -45 and 45 degrees
+			break;
+
+		case QUAD_CLOSELOOP_RATES:
+			quad_trackrollpitchrate();
+			servo_out[CH_THROTTLE]  = radio_in[CH_THROTTLE];													// even though servo_out is a float - this number should just hold the integer throttle stick command.  It is different from the roll, pitch, and yaw "servo" commands
 			break;
 
 		case MANUAL:

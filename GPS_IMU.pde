@@ -35,18 +35,6 @@ Byte(s)		 Value
 10,11		yaw			Integer (degrees*100)
 12,13					checksum
 
-IMU Message format - new with Airspeed!
-Byte(s)		 Value
-0-3		 Header "DIYd"
-4						Payload length	= 8
-5						Message ID = 4
-6,7			roll		Integer (degrees*100)
-8,9			pitch		Integer (degrees*100)
-10,11		yaw			Integer (degrees*100)
-12,13		airspeed	Integer (meters*100)
-14,15					checksum
-
-
 GPS Message format
 Byte(s)		 Value
 0-3		 Header "DIYd"
@@ -58,7 +46,28 @@ Byte(s)		 Value
 16,17		gps speed			Integer (M/S*100)
 18,19		gps course			not used
 20,21		checksum
-*/
+
+IMU Message format - new with Airspeed!
+Byte(s)		 Value
+0-3		 Header "DIYd"
+4						Payload length	= 8
+5						Message ID = 4
+6,7			roll		Integer (degrees*100)
+8,9			pitch		Integer (degrees*100)
+10,11		yaw			Integer (degrees*100)
+12,13		airspeed	Integer (meters*100)
+14,15					checksum
+
+IMU Rates Message format - Doesn't seem to work with 0x02 message
+Byte(s)		Value
+0-3	        Header "DIYd"
+4		Payload length	= 6
+5		Message ID = 5
+6,7		roll rate	Integer (degrees/s*10)
+8,9		pitch rate	Integer (degrees/s*10)
+10,11		yaw rate	Integer (degrees/s*10)
+12,13		checksum
+IMU Message formatByte(s)		Value0-3			Header "DIYd"4			Payload length	= 12 = 0x0c5			Message ID = 66,7			roll		Integer (degrees*100)8,9			pitch		Integer (degrees*100)10,11		yaw			Integer (degrees*100)12,13		rollrate	Integer (degrees*100)14,15		pitchrate	Integer (degrees*100)16,17		yawrate		Integer (degrees*100)18,19		checksum*/
 
 void decode_gps(void)
 {
@@ -79,15 +88,18 @@ void decode_gps(void)
 				if(data == 'D'){//0x44){
 					IMU_step++; //First byte of data packet header is correct, so jump to the next step
 				}
-				//}else{
-					//Serial.println("IMU parser Case 0 fail");	 // This line for debugging only
-				//}
+                                else
+                                {
+					Serial.println("IMU parser Case 0 fail");	 // This line for debugging only
+					IMU_step=0;		 //For consistency.	
+				}
 				break; 
 
 			case 1:	
 				if(data == 'I'){//0x49){
 					 IMU_step++;	//Second byte of data packet header is correct
 				}else {	
+					Serial.println("IMU parser Case 1 fail");	 // This line for debugging only
 					IMU_step=0;		 //Second byte is not correct so restart to step zero and try again.	
 				}	 
 				break;
@@ -96,7 +108,7 @@ void decode_gps(void)
 				if(data == 'Y'){//0x59){
 					 IMU_step++;	//Third byte of data packet header is correct
 				}else {
-					//Serial.println("IMU parser Case 2 fail");	 // This line for debugging only
+					Serial.println("IMU parser Case 2 fail");	 // This line for debugging only
 					IMU_step=0;		 //Third byte is not correct so restart to step zero and try again.
 				}		 
 				break;
@@ -105,7 +117,7 @@ void decode_gps(void)
 			if(data == 'd'){//0x64){
 					 IMU_step++;	//Fourth byte of data packet header is correct, Header complete
 				} else {
-					//Serial.print("IMU parser Case 3 fail.  Received ");	// This line for debugging only
+					Serial.print("IMU parser Case 3 fail. ");	// This line for debugging only
 					//Serial.print(data,DEC);								// This line for debugging only
 					//Serial.println(" instead of 100");					// This line for debugging only
 					IMU_step=0;		 //Fourth byte is not correct so restart to step zero and try again.
@@ -130,6 +142,14 @@ void decode_gps(void)
 
 			case 5:	
 				message_num = data;
+                               #if DEBUG_INFLIGHT == 2
+                                if(message_num==0x02)
+                                  Serial.println("Got a IMU attitude packet");
+                                else if(message_num==0x05)
+                                  Serial.println("Got a IMU rates packet");
+                                else if(message_num==0x06)
+                                  Serial.println("Got a combined IMU packet");
+                               #endif
 				checksum(data);
 				IMU_step++;		 
 				break;
@@ -139,9 +159,8 @@ void decode_gps(void)
 				IMU_buffer[payload_counter] = data;
 				checksum(data);
 				payload_counter++;
-				if (payload_counter >= payload_length) { 
-					IMU_step++; 
-				}
+				if (payload_counter >= payload_length)
+                                 IMU_step++; 
 				break;
 			case 7:
 				IMU_ck_a=data;	 // First checksum byte
@@ -162,12 +181,21 @@ void decode_gps(void)
 					} else if (message_num == 0x04) {
 						IMU2_join_data();
 						IMU_timer = DIYmillis();
+					} else if (message_num == 0x05) {
+						IMU_join_rates_data();
+						IMU_timer = DIYmillis();
+					} else if (message_num == 0x06) {
+						IMU_join_combined_data();
+						IMU_timer = DIYmillis();
 					} else if (message_num == 0x0a) {
 						PERF_join_data();
 					} else {
 						Serial.print("Invalid message number = ");
 						Serial.println(message_num,DEC);
 					}
+                                       #if DEBUG_INFLIGHT == 2
+         				Serial.println("MSG Checksum good");	//good checksum
+                                       #endif
 				} else {
 					Serial.println("MSG Checksum error");	//bad checksum
 					imu_checksum_error_count++;
@@ -180,7 +208,7 @@ void decode_gps(void)
 				IMU_timer = DIYmillis(); //Restarting timer...
 				break;
 			}
-		}// End for...
+		}// End for number of bytes in serial input buffer
 	}
 
 	if((DIYmillis() - IMU_timer) > 500){	//If we don't receive IMU data in 1/2 second, set flag
@@ -222,6 +250,67 @@ void IMU_join_data()
 	intUnion.byte[0] = IMU_buffer[j++];
 	intUnion.byte[1] = IMU_buffer[j++];
 	ground_course = intUnion.word;
+	
+	imu_ok = true;
+}
+
+void IMU_join_rates_data()
+{
+	imu_messages_received++;
+	int j=0;
+
+	 //Storing IMU roll rate
+	intUnion.byte[0] = IMU_buffer[j++];
+	intUnion.byte[1] = IMU_buffer[j++];
+	roll_rate_sensor = intUnion.word;
+
+	 //Storing IMU pitch rate
+	intUnion.byte[0] = IMU_buffer[j++];
+	intUnion.byte[1] = IMU_buffer[j++];
+	pitch_rate_sensor = intUnion.word;
+
+	 //Storing IMU heading (yaw) rate
+	intUnion.byte[0] = IMU_buffer[j++];
+	intUnion.byte[1] = IMU_buffer[j++];
+	yaw_rate_sensor = intUnion.word;
+	
+	imu_ok = true;
+}
+
+void IMU_join_combined_data()
+{
+	imu_messages_received++;
+	int j=0;
+
+	 //Storing IMU roll
+	intUnion.byte[0] = IMU_buffer[j++];
+	intUnion.byte[1] = IMU_buffer[j++];
+	roll_sensor = intUnion.word;
+
+	 //Storing IMU pitch
+	intUnion.byte[0] = IMU_buffer[j++];
+	intUnion.byte[1] = IMU_buffer[j++];
+	pitch_sensor = intUnion.word;
+
+	 //Storing IMU heading (yaw)
+	intUnion.byte[0] = IMU_buffer[j++];
+	intUnion.byte[1] = IMU_buffer[j++];
+	ground_course = intUnion.word;
+
+	 //Storing IMU roll rate
+	intUnion.byte[0] = IMU_buffer[j++];
+	intUnion.byte[1] = IMU_buffer[j++];
+	roll_rate_sensor = intUnion.word;
+
+	 //Storing IMU pitch rate
+	intUnion.byte[0] = IMU_buffer[j++];
+	intUnion.byte[1] = IMU_buffer[j++];
+	pitch_rate_sensor = intUnion.word;
+
+	 //Storing IMU heading (yaw) rate
+	intUnion.byte[0] = IMU_buffer[j++];
+	intUnion.byte[1] = IMU_buffer[j++];
+	yaw_rate_sensor = intUnion.word;
 	
 	imu_ok = true;
 }

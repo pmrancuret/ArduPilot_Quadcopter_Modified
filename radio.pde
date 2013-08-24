@@ -42,19 +42,25 @@ void read_radio()
 	// Rudder with no filter
 	radio_in[CH_RUDDER] = timer4diff * .5;
 
-	#if MIXING_MODE == 0
-		radio_in[CH_ROLL] = ch1_temp;
-		radio_in[CH_PITCH] = ch2_temp;
-	#endif
+       #if MIXING_MODE == 0
+	radio_in[CH_ROLL] = ch1_temp;
+	radio_in[CH_PITCH] = ch2_temp;
+       #endif
 	
-	#if  MIXING_MODE == 1
-		radio_in[CH_ROLL] = REVERSE_ELEVONS * (REVERSE_CH2_ELEVON*(ch2_temp-elevon2_trim) - REVERSE_CH1_ELEVON*(ch1_temp-elevon1_trim))/2 + 1500;
-		radio_in[CH_PITCH] = (REVERSE_CH2_ELEVON*(ch2_temp-elevon2_trim) + REVERSE_CH1_ELEVON*(ch1_temp-elevon1_trim))/2 + 1500;
-	#endif
+       #if  MIXING_MODE == 1
+	radio_in[CH_ROLL] = REVERSE_ELEVONS * (REVERSE_CH2_ELEVON*(ch2_temp-elevon2_trim) - REVERSE_CH1_ELEVON*(ch1_temp-elevon1_trim))/2 + 1500;
+	radio_in[CH_PITCH] = (REVERSE_CH2_ELEVON*(ch2_temp-elevon2_trim) + REVERSE_CH1_ELEVON*(ch1_temp-elevon1_trim))/2 + 1500;
+       #endif
+        
+       #if DEBUG_INFLIGHT == 1
+        Serial.println("Roll:");
+        Serial.print("RadioIn: ");
+        Serial.print(radio_in[CH_ROLL],DEC);
+       #endif
 
-	#if REVERSE_THROTTLE
-		radio_in[CH_THROTTLE] = 3000 - radio_in[CH_THROTTLE];
-	#endif
+       #if REVERSE_THROTTLE
+	radio_in[CH_THROTTLE] = 3000 - radio_in[CH_THROTTLE];
+       #endif
 		
 	servo_out[CH_THROTTLE] = (float)(radio_in[CH_THROTTLE] - CH3_MIN) / (float)(CH3_MAX - CH3_MIN) *100;
 	servo_out[CH_THROTTLE] = constrain(servo_out[CH_THROTTLE], 0, 100);	

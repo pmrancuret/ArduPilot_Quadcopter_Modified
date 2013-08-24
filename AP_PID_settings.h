@@ -4,7 +4,7 @@
 /***************************************/
 //ATTITUDE: ROLL GAINS [Start with changes of no more than 25% at a time]
 // IMPORTANT!!	Servo Gain values will be 100 times less than equivalent gains for ArduPilot 2.5
-#define SERVO_ROLL_P .004				// Primary value to tune - overall proportional term determines how much rudder/aileron you use to turn
+#define SERVO_ROLL_P .02f				// Primary value to tune - overall proportional term determines how much rudder/aileron you use to turn
 #define SERVO_ROLL_I .00				// roll PID integrator gain (value should generally be low)
 #define SERVO_ROLL_D .00				// roll PID derivative gain (for advanced users - should be zero for most airframes)
 #define SERVO_ROLL_INT_MAX 500	// Maximium integrator value in degrees * 100
@@ -14,7 +14,7 @@
 /***************************************/
 //ATTITUDE: PITCH GAINS [Start with changes of no more than 25% at a time]
 //IMPORTANT!!	Servo Gain values will be 100 times less than equivalent gains for ArduPilot 2.5
-#define SERVO_PITCH_P .005				// Pitch Proportional gain
+#define SERVO_PITCH_P .004				// Pitch Proportional gain
 #define SERVO_PITCH_I .0				// Pitch integrator gain	(value should generally be low)
 #define SERVO_PITCH_D .0				// Pitch derivative gain	(for advanced users - should be zero for most airframes)
 #define SERVO_PITCH_INT_MAX	500	// Maximum integrator value in degrees * 100
